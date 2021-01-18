@@ -11,10 +11,12 @@ app.get('/api/live', function (req, res) {
     if (status == 1) {
         console.log(path);
         currentLive[roomId] = new LiveEvent(roomId, path);
+        res.send({ 'msg': 1 });
     } else {
         currentLive[roomId].newPath = path;
         currentLive[roomId].live.close();
         delete currentLive[roomId];
+        res.send({ 'msg': 0 });
     }
 });
 app.listen(3000);
