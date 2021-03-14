@@ -13,9 +13,11 @@ app.get('/api/live', function (req, res) {
         currentLive[roomId] = new LiveEvent(roomId, path);
         res.send({ 'msg': 1 });
     } else {
-        currentLive[roomId].newPath = path;
-        currentLive[roomId].live.close();
-        delete currentLive[roomId];
+        if (roomId in currentLive) {
+            currentLive[roomId].newPath = path;
+            currentLive[roomId].live.close();
+            delete currentLive[roomId];
+        }
         res.send({ 'msg': 0 });
     }
 });
@@ -113,16 +115,18 @@ class LiveEvent {
             })
         })
         live.on('close', () => {
-            fs.writeSync(this.xmlFile, '</i>');
-            fs.writeSync(this.jsonFile, '\n]');
-            fs.closeSync(this.txtFile);
-            fs.closeSync(this.xmlFile);
-            fs.closeSync(this.jsonFile);
-            let newPath = this.newPath;
-            fs.renameSync(path + ".txt", newPath + ".txt");
-            fs.renameSync(path + ".xml", newPath + ".xml");
-            fs.renameSync(path + ".json", newPath + ".json");
-            console.log(`${roomId} Connection is closed`);
+            if ("newPath" in this) {
+                fs.writeSync(this.xmlFile, '</i>');
+                fs.writeSync(this.jsonFile, '\n]');
+                fs.closeSync(this.txtFile);
+                fs.closeSync(this.xmlFile);
+                fs.closeSync(this.jsonFile);
+                let newPath = this.newPath;
+                fs.renameSync(path + ".txt", newPath + ".txt");
+                fs.renameSync(path + ".xml", newPath + ".xml");
+                fs.renameSync(path + ".json", newPath + ".json");
+                console.log(`${roomId} Connection is closed`);
+            }
         })
     }
 
